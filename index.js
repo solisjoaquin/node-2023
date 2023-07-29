@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const uuid = require("uuid/v4");
+const { v4: uuidv4 } = require("uuid");
+//const _ = require("underscore");
 
 const app = express();
 
@@ -37,7 +38,7 @@ app
       });
       return;
     }
-    product.id = uuid();
+    product.id = uuidv4();
     products.push(product);
     res.status(201).json(product);
   });
@@ -48,6 +49,25 @@ app.get("/products/:id", (req, res) => {
   res.json(product);
 
   res.status(404).json({ message: "Product not found" });
+});
+
+app.put("/products/:id", (req, res) => {
+  const id = req.params.id;
+  const productIndex = products.findIndex((item) => item.id === Number(id));
+  if (productIndex === -1) {
+    res.status(404).json({ message: "Product not found" });
+    return;
+  }
+  const product = req.body;
+  if (!product || !product.name || !product.price) {
+    res.status(400).json({
+      message: "Bad request",
+    });
+    return;
+  }
+  product.id = id;
+  products[productIndex] = product;
+  res.status(200).json(product);
 });
 
 app.get("/", (req, res) => {
